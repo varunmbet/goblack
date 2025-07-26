@@ -243,12 +243,26 @@ func (r *Router) EndGroup() {
 }
 
 func (r *Router) Show() {
-	//t := r.treeGroup[MethodGet]
-	data, err := json.Marshal(*r.Trees[MethodGet])
-	if err != nil {
-		fmt.Println("生成json字符串错误")
+	for method, root := range r.Trees {
+		showNode(method, root, "")
 	}
-	fmt.Printf("JSON data:\n%v\n", data)
+}
+
+func showNode(method string, n *node, prefix string) {
+	if n == nil {
+		return
+	}
+	path := prefix + n.path
+	if n.controller != "" {
+		fmt.Printf("[%s] %s => controller: %s\n", method, path, n.controller)
+	}
+	if len(n.handlers) > 0 {
+		handlerInfo := "handler(s)"
+		fmt.Printf("[%s] %s => %s\n", method, path, handlerInfo)
+	}
+	for _, child := range n.children {
+		showNode(method, child, path)
+	}
 }
 
 func (r *Router) String() string {

@@ -50,10 +50,10 @@ func TestControllerStringRoute(t *testing.T) {
 }
 
 func TestDynamicParamRoute(t *testing.T) {
-	req := httptest.NewRequest("GET", "/user/123", nil)
+	req := httptest.NewRequest("GET", "/user/1234", nil)
 	w := httptest.NewRecorder()
 	app.ServeHTTP(w, req)
-	if !strings.Contains(w.Body.String(), "123") {
+	if !strings.Contains(w.Body.String(), "1234") {
 		t.Errorf("expect 123, got %s", w.Body.String())
 	}
 }
@@ -183,4 +183,10 @@ func TestGroupAndGlobalMiddleware(t *testing.T) {
 	if !strings.Contains(w2.Body.String(), "out ok") {
 		t.Errorf("expect out ok, got %s", w2.Body.String())
 	}
+}
+
+func TestRouterShow(t *testing.T) {
+	// 这里只做人工检查输出，确保 Show 能打印所有注册路由
+	app.Router().Show()
+	// 可以手动检查控制台输出是否包含 /ping、/hello、/user/:id、/api/data、/mwtest、/api/mix、/out 等
 }
