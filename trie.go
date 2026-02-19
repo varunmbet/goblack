@@ -525,7 +525,6 @@ founded bool
 用途：如果为 true，说明找到了对应的 controller 和 hook；如果为 false，说明没有匹配到。
 */
 func (n *node) getValue(path string) (controller string, handlers []HandlerFunc, hook []HandlerFunc, vars map[string]string, founded bool) {
-	vars = make(map[string]string)
 	founded = false
 walk: // Outer loop for walking the tree
 	for {
@@ -564,6 +563,9 @@ walk: // Outer loop for walking the tree
 						end++
 					}
 
+					if vars == nil {
+						vars = make(map[string]string, 2)
+					}
 					vars[n.path[1:]] = path[:end]
 					//保存路径为参数
 					// Save param value
@@ -614,6 +616,9 @@ walk: // Outer loop for walking the tree
 					//*
 				case catchAll:
 					// Save param value
+					if vars == nil {
+						vars = make(map[string]string, 2)
+					}
 					vars[n.path[2:]] = path
 					/*if params != nil {
 						if ps == nil {

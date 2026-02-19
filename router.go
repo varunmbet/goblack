@@ -266,7 +266,11 @@ func showNode(method string, n *node, prefix string) {
 }
 
 func (r *Router) String() string {
-	b, _ := json.Marshal(*r.Trees[MethodGet])
+	root := r.Trees[MethodGet]
+	if root == nil {
+		return "{}"
+	}
+	b, _ := json.Marshal(*root)
 	var out bytes.Buffer
 	_ = json.Indent(&out, b, "", "  ")
 	return out.String()

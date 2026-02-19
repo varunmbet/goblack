@@ -14,24 +14,18 @@ func (t *TestController) Hello(c *Context) {
 	c.String(200, "hello controller")
 }
 
-var app *Application
-
-func init() {
-	app = Instance("demo")
+func newTestApp() *Application {
+	app := NewApplication("test")
 	app.Router().RegisterController(&TestController{})
-	app.Router().Get("/ping", func(c *Context) {
-		c.String(200, "pong")
-	})
-	app.Router().Get("/hello", "TestController@Hello")
-	app.Router().Get("/user/:id", func(c *Context) {
-		c.String(200, c.Param("id"))
-	})
-	app.Router().Get("/group", func(c *Context) {
-		c.String(200, "group")
-	})
+	return app
 }
 
 func TestHandlerFuncRoute(t *testing.T) {
+	app := newTestApp()
+	app.Router().Get("/ping", func(c *Context) {
+		c.String(200, "pong")
+	})
+
 	req := httptest.NewRequest("GET", "/ping", nil)
 	w := httptest.NewRecorder()
 	app.ServeHTTP(w, req)
@@ -41,6 +35,9 @@ func TestHandlerFuncRoute(t *testing.T) {
 }
 
 func TestControllerStringRoute(t *testing.T) {
+	app := newTestApp()
+	app.Router().Get("/hello", "TestController@Hello")
+
 	req := httptest.NewRequest("GET", "/hello", nil)
 	w := httptest.NewRecorder()
 	app.ServeHTTP(w, req)
@@ -50,6 +47,11 @@ func TestControllerStringRoute(t *testing.T) {
 }
 
 func TestDynamicParamRoute(t *testing.T) {
+	app := newTestApp()
+	app.Router().Get("/user/:id", func(c *Context) {
+		c.String(200, c.Param("id"))
+	})
+
 	req := httptest.NewRequest("GET", "/user/1234", nil)
 	w := httptest.NewRecorder()
 	app.ServeHTTP(w, req)
@@ -59,6 +61,7 @@ func TestDynamicParamRoute(t *testing.T) {
 }
 
 func TestNotFoundRoute(t *testing.T) {
+	app := newTestApp()
 	req := httptest.NewRequest("GET", "/notfound", nil)
 	w := httptest.NewRecorder()
 	app.ServeHTTP(w, req)
@@ -68,6 +71,7 @@ func TestNotFoundRoute(t *testing.T) {
 }
 
 func TestGroupRoute(t *testing.T) {
+	app := newTestApp()
 	called := false
 	app.Router().Group("/api", func(c *Context) {
 		called = true
@@ -90,6 +94,7 @@ func TestGroupRoute(t *testing.T) {
 }
 
 func TestGlobalMiddleware(t *testing.T) {
+	app := newTestApp()
 	called := false
 	app.Router().Use(func(c *Context) {
 		called = true
@@ -111,6 +116,7 @@ func TestGlobalMiddleware(t *testing.T) {
 }
 
 func TestWebsocket(t *testing.T) {
+	app := newTestApp()
 	app.Websocket("/ws", func(conn *websocket.Conn, c *Context) {
 		conn.WriteMessage(websocket.TextMessage, []byte("hello ws"))
 	})
@@ -132,6 +138,7 @@ func TestWebsocket(t *testing.T) {
 }
 
 func TestGroupAndGlobalMiddleware(t *testing.T) {
+	app := newTestApp()
 	globalCalled := false
 	groupCalled := false
 
@@ -186,6 +193,14 @@ func TestGroupAndGlobalMiddleware(t *testing.T) {
 }
 
 func TestRouterShow(t *testing.T) {
+	app := newTestApp()
+	app.Router().Get("/ping", func(c *Context) {
+		c.String(200, "pong")
+	})
+	app.Router().Get("/hello", "TestController@Hello")
+	app.Router().Get("/user/:id", func(c *Context) {
+		c.String(200, c.Param("id"))
+	})
 	// 这里只做人工检查输出，确保 Show 能打印所有注册路由
 	app.Router().Show()
 	// 可以手动检查控制台输出是否包含 /ping、/hello、/user/:id、/api/data、/mwtest、/api/mix、/out 等

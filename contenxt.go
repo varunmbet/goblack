@@ -525,14 +525,20 @@ func (c *Context) GetHeader(key string) string {
 
 // String write text by string
 func (c *Context) String(code int, s string) {
-	c.Resp.Header().Set("Content-Type", TextPlainCharsetUTF8)
+	// 如果 Content-Type 还没有设置，才设置默认值
+	if c.Resp.Header().Get("Content-Type") == "" {
+		c.Resp.Header().Set("Content-Type", TextPlainCharsetUTF8)
+	}
 	c.Resp.WriteHeader(code)
 	c.Resp.Write([]byte(s))
 }
 
 // Text write text by []byte
 func (c *Context) Text(code int, s []byte) {
-	c.Resp.Header().Set("Content-Type", TextHTMLCharsetUTF8)
+	// 如果 Content-Type 还没有设置，才设置默认值
+	if c.Resp.Header().Get("Content-Type") == "" {
+		c.Resp.Header().Set("Content-Type", TextHTMLCharsetUTF8)
+	}
 	c.Resp.WriteHeader(code)
 	c.Resp.Write(s)
 }
